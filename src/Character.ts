@@ -31,18 +31,21 @@ class Character implements Fighter {
   public get race(): Race { return this._race; }
   public get archetype(): Archetype { return this._archetype; }
   public get lifePoints(): number { return this._lifePoints; }
+  public set lifePoints(lP: number) { this._lifePoints = lP; }
   public get strength(): number { return this._strength; }
   public get defense(): number { return this._defense; }
   public get dexterity(): number { return this._dexterity; }
   public get energy(): Energy { return this._energy; }
 
-  public receiveDamage(attackPoints: number): void {
+  public receiveDamage(attackPoints: number): number {
     const damage = this.defense - attackPoints;
     if (damage > 0) {
       this._lifePoints -= damage;
     }
 
     if (this._lifePoints < 0) this._lifePoints = -1;
+
+    return this._lifePoints;
   }
 
   public attack(enemy: Fighter | SimpleFighter): void {
@@ -81,10 +84,5 @@ class Character implements Fighter {
     this.attack(e);
   }
 }
-
-const char = new Character('EU');
-console.log(char);
-char.levelUp();
-console.log(char);
 
 export default Character;
