@@ -1,29 +1,42 @@
 import Fighter, { SimpleFighter } from '../Fighter';
-import Monster from '../Monster';
 import Battle from './Battle';
 
+function checkLife(playerLife: number, monsters: number[]) {
+  if (playerLife === -1) return 'monster';
+  if (monsters.every((monster) => monster === -1)) return 'player';
+  return false;
+}
 class PVE extends Battle {
-  private _monsters: Array<Monster | Fighter | SimpleFighter>;
+  private _monsters: SimpleFighter[];
 
   constructor(
     fighter: Fighter, 
-    monsters: Array<Monster | Fighter | SimpleFighter>,
+    monsters: SimpleFighter[],
   ) {
     super(fighter);
     this._monsters = monsters;
   }
 
   fight(): number {
-    this._monsters.forEach((monster) => {
-      monster.attack(this.player);
-      this.player.attack(monster);
-    });
+    let fightOngoing = true;
+    let winner = 'player';
 
-    if (this.player.lifePoints === -1) {
-      return -1;
+    while (fightOngoing) {
+      this._monsters.forEach((monster) => {
+        monster.attack(this.player);
+        this.player.attack(monster);
+      });
+
+      const monstersLife = this._monsters.map(({ lifePoints }) => lifePoints);
+
+      const checkFighter = checkLife(this.player.lifePoints, monstersLife);
+
+      if (checkFighter) {
+        fightOngoing = false;
+        winner = checkFighter;
+      }
     }
-
-    return 1;
+    return winner === 'player' ? 1 : -1;
   }
 }
 
