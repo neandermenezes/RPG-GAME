@@ -1,3 +1,7 @@
+/* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable no-plusplus */
+/* eslint-disable max-len */
 import Archetype, { Mage } from './Archetypes';
 import Energy from './Energy';
 import Fighter, { SimpleFighter } from './Fighter';
@@ -15,15 +19,15 @@ class Character implements Fighter {
   private _energy: Energy;
 
   constructor(private _name: string) {
-    this._race = new Elf(_name, 10);
-    this._archetype = new Mage(_name);
-    this._maxLifePoints = this.race.maxLifePoints / 2;
+    this._race = new Elf(this._name, 10);
+    this._archetype = new Mage(this._name);
+    this._maxLifePoints = this._race.maxLifePoints / 2;
     this._lifePoints = this._maxLifePoints;
     this._strength = getRandomInt(1, 10);
     this._defense = getRandomInt(1, 10);
-    this._dexterity = this.race.dexterity;
+    this._dexterity = this._race.dexterity;
     this._energy = { 
-      type_: this.archetype.energyType, 
+      type_: this._archetype.energyType, 
       amount: getRandomInt(1, 10),
     };
   }
@@ -31,26 +35,34 @@ class Character implements Fighter {
   public get race(): Race { return this._race; }
   public get archetype(): Archetype { return this._archetype; }
   public get lifePoints(): number { return this._lifePoints; }
-  public set lifePoints(lP: number) { this._lifePoints = lP; }
   public get strength(): number { return this._strength; }
   public get defense(): number { return this._defense; }
   public get dexterity(): number { return this._dexterity; }
-  public get energy(): Energy { return this._energy; }
+  public get energy(): Energy { 
+    return {
+      type_: this._energy.type_,
+      amount: this._energy.amount,
+    };
+  }
 
   public receiveDamage(attackPoints: number): number {
-    const damage = this.defense - attackPoints;
-    if (damage > 0) {
-      this._lifePoints -= damage;
+    const damage = attackPoints - this._defense;
+    let newLifePoints: number;
+
+    if (damage <= 0) {
+      return this._lifePoints;
     }
 
-    if (this._lifePoints < 0) this._lifePoints = -1;
+    newLifePoints = this._lifePoints - damage;
 
+    if (newLifePoints <= 0) newLifePoints = -1;
+
+    this._lifePoints = newLifePoints;
     return this._lifePoints;
   }
 
   public attack(enemy: Fighter | SimpleFighter): void {
-    const e = enemy;
-    e.lifePoints -= this._strength;
+    enemy.receiveDamage(this._strength);
   }
 
   public levelUp(): void {
@@ -78,11 +90,26 @@ class Character implements Fighter {
   public special(enemy: Fighter): void {
     const e = enemy;
     if (getRandomInt(1, 10) % 2 === 0) {
-      e.lifePoints += this.strength / 2;
+      enemy.receiveDamage(this._strength * 2);
     }
 
     this.attack(e);
   }
 }
+
+const c1 = new Character('');
+const result = () => {
+  let res = true;
+  for (let i = 0; i < 3; i++) {
+    const previousLife = c1.lifePoints;
+    if (previousLife <= 0) break;
+    const life = c1.receiveDamage(10 ** i);
+    res = 10 ** i > previousLife + c1.defense ? life === -1 : life <= previousLife && life >= previousLife - (10 ** i);
+    if (!res) break;
+  }
+  return res;
+};
+
+console.log(result());
 
 export default Character;
