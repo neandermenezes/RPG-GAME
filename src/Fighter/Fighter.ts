@@ -14,7 +14,7 @@ interface Fighter extends SimpleAttributes, SimpleActions {
   energy?: Energy,
 
   levelUp(): void;
-  receiveDamage(attackPoints: number): void;
+  special(enemy: Fighter): void;
 }
 
 export default Fighter;
