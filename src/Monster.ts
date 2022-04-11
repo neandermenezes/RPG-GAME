@@ -10,8 +10,7 @@ class Monster implements SimpleFighter {
   get strength(): number { return this._strength; }
 
   attack(enemy: SimpleFighter): void {
-    const e = enemy;
-    e.lifePoints -= this._strength;
+    enemy.receiveDamage(this._strength);
   }
 
   receiveDamage(attackPoints: number): number {
